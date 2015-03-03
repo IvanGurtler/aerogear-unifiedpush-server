@@ -41,7 +41,8 @@ http://java.sun.com/xml/ns/persistence/orm_2_0.xsd"
         <attributes>
             <basic name="deviceToken">
                 <!-- "The max size for a registration_id is bounded by the max size for a cookie, which is 4K (4096 bytes)." -->
-                <column length="4096" />
+                <!-- <column length="4096" /> BECAUSE ORACLE !!!-->
+    			<column length="4000" />
             </basic>
             <many-to-one name="variant" fetch="LAZY">
                 <join-column name="variantID" referenced-column-name="variantID"/>
@@ -64,7 +65,8 @@ http://java.sun.com/xml/ns/persistence/orm_2_0.xsd"
         <discriminator-value>ios</discriminator-value>
         <attributes>
             <basic name="certificateData">
-                <column name="cert_data" length="100000"/>
+                <column name="cert_data"/> <!--length="100000"/> BECAUSE ORACLE !!!-->
+    			<lob/>
             </basic>
         </attributes>
     </entity>

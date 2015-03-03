@@ -624,7 +624,7 @@ public class InstallationDaoTest {
 
         Installation android1 = new Installation();
         android1.setAlias("foo@bar.org");
-        android1.setDeviceToken(TestUtils.longString(4097));
+        android1.setDeviceToken(TestUtils.longString(4001)); // ORACLE -> 4097 change to 4001
         android1.setVariant(variant);
 
         installationDao.create(android1);
@@ -642,7 +642,7 @@ public class InstallationDaoTest {
 
         Installation android1 = new Installation();
         android1.setAlias("foo@bar.org");
-        android1.setDeviceToken(TestUtils.longString(4096));
+        android1.setDeviceToken(TestUtils.longString(4000)); // ORACLE -> 4096 change to 4000
         android1.setVariant(variant);
 
         installationDao.create(android1);
