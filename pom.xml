@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.jboss.aerogear</groupId>
         <artifactId>aerogear-parent</artifactId>
-        <version>0.2.12</version>
+        <version>0.2.13</version>
     </parent>
 
     <groupId>org.jboss.aerogear.unifiedpush</groupId>
@@ -81,11 +81,16 @@
                 Here we use
                 the jboss-javaee-6.0 stack (you can read this as the JBoss stack of the Java EE 6 APIs) -->
             <dependency>
-                <groupId>org.jboss.spec</groupId>
-                <artifactId>jboss-javaee-6.0</artifactId>
+                <groupId>org.jboss.bom</groupId>
+                <artifactId>jboss-javaee-6.0-with-hibernate</artifactId>
                 <version>${jboss-javaee-6.0.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>4.2.15.Final</version>
             </dependency>
 
             <!-- AeroGear Dependencies BOM Imports -->
@@ -119,26 +124,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>enforce-tools</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireJavaVersion>
-                                    <!-- Enforce java 1.7 for compiling -->
-                                    <!-- This is needed because jax-doclet is broken on jdk8 -->
-                                    <version>(,1.8)</version>
-                                </requireJavaVersion>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <!-- we really do not need javadocs for the server, there are no Java APIs exposed -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -176,7 +161,7 @@
 
         <!-- Define the version of JBoss' Java EE 6 APIs we want to import. Any dependencies from org.jboss.spec will have their
             version defined by this BOM -->
-        <jboss-javaee-6.0.version>3.0.2.Final</jboss-javaee-6.0.version>
+        <jboss-javaee-6.0.version>1.0.7.Final</jboss-javaee-6.0.version>
 
         <!--
             Options to override the compiler arguments directly on the compiler arument line to separate between what
@@ -188,7 +173,7 @@
         <jboss-as-maven-plugin.version>7.5.Final</jboss-as-maven-plugin.version>
         <wildfly-maven-plugin.version>1.0.2.Final</wildfly-maven-plugin.version>
 
-        <aerogear.bom.version>0.2.12</aerogear.bom.version>
+        <aerogear.bom.version>0.2.13</aerogear.bom.version>
 
         <!-- Override versions of AeroGear BOMs-->
         <junit.version>4.11</junit.version>
@@ -252,6 +237,40 @@
                 <module>dist</module>
             </modules>
         </profile>
+
+        <!--
+            Profile for JAX-RS doclet generation. This is only working on JDK7, due to the usage of outdated tools
+
+            Usage:
+               - mvn clean install -Pjaxrs-doclet,test
+        -->
+        <profile>
+            <id>jaxrs-doclet</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>enforce-tools</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireJavaVersion>
+                                            <!-- Enforce java 1.7 for compiling -->
+                                            <!-- This is needed because jax-doclet is broken on jdk8 -->
+                                            <version>(,1.8)</version>
+                                        </requireJavaVersion>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+	            </plugins>
+	        </build>
+		</profile>
 
         <profile>
             <id>code-coverage</id>

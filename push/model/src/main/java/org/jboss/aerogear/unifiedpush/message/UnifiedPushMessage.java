@@ -21,6 +21,7 @@ import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -33,33 +34,49 @@ import java.util.LinkedHashMap;
  *
  * Messages are submitted as follows:
  * <pre>
- *  "message": {
- *   "alert": "HELLO!",
- *   "title": "Title",
- *   "action": "Safari Action",
- *   "url-args":[ "arg1", "arg2" ],
- *   "action-category": "some value",
- *   "sound": "default",
- *   "badge": 2,
- *   "content-available": true,
- *   "user-data": {
- *       "key": "value",
- *       "key2": "other value"
- *   },
- *   "simple-push": "version=123"
- *  },
- *  "criteria": {
- *      "alias": [ "someUsername" ],
- *      "deviceType": [ "someDevice" ],
- *      "categories": [ "someCategories" ],
- *      "variants": [ "someVariantIDs" ]
- *  },
- *  "config": {
- *      "ttl": 3600
- *  }
+ * {
+ *   "message": {
+ *       "alert": "HELLO!",
+ *       "sound": "default",
+ *       "badge": 2,
+ *       "user-data": {
+ *          "key": "value",
+ *          "key2": "other value"
+ *       },
+ *       "windows": {
+ *           "type": "tile",
+ *           "duration": "short",
+ *           "badge": "alert",
+ *           "tileType": "TileWideBlockAndText01",
+ *           "images": ["Assets/test.jpg", "Assets/background.png"],
+ *           "textFields": ["foreground text"]
+ *       },
+ *       "apns": {
+ *           "title" : "someTitle",
+ *           "action-category": "some value",
+ *           "content-available": true,
+ *           "action" : "someAction",
+ *           "url-args" :["args1","arg2"],
+ *           "localized-title-key" : "some value",
+ *           "localized-title-arguments" : ["args1","arg2"]
+ *       },
+ *       "simple-push": "version=123"
+ *    },
+ *    "criteria": {
+ *         "alias": [ "someUsername" ],
+ *         "deviceType": [ "someDevice" ],
+ *         "categories": [ "someCategories" ],
+ *         "variants": [ "someVariantIDs" ]
+ *     },
+ *    "config": {
+ *         "ttl": 3600
+ *     }
+ * }
  * </pre>
  */
-public class UnifiedPushMessage {
+public class UnifiedPushMessage implements Serializable {
+
+    private static final long serialVersionUID = -5978882928783277261L;
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -116,7 +133,7 @@ public class UnifiedPushMessage {
 
     public void setClientIdentifier(String clientIdentifier) { this.clientIdentifier = clientIdentifier; }
 
-    public String toJsonString() {
+    public String toStrippedJsonString() {
         try {
             final HashMap<String, Object> json = new LinkedHashMap<String, Object>();
             json.put("ipAddress", this.ipAddress);
@@ -125,6 +142,16 @@ public class UnifiedPushMessage {
             json.put("criteria", this.criteria);
             json.put("config", this.config);
             return OBJECT_MAPPER.writeValueAsString(json);
+        } catch (JsonProcessingException e) {
+            return "[\"invalid json\"]";
+        } catch (IOException e) {
+            return "[\"invalid json\"]";
+        }
+    }
+
+    public String toJsonString() {
+        try {
+            return OBJECT_MAPPER.writeValueAsString(this);
         } catch (JsonProcessingException e) {
             return "[\"invalid json\"]";
         } catch (IOException e) {

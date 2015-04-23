@@ -30,6 +30,7 @@ import org.jboss.aerogear.unifiedpush.api.Variant;
 import org.jboss.aerogear.unifiedpush.api.iOSVariant;
 import org.jboss.aerogear.unifiedpush.message.Message;
 import org.jboss.aerogear.unifiedpush.message.UnifiedPushMessage;
+import org.jboss.aerogear.unifiedpush.message.apns.APNs;
 import org.jboss.aerogear.unifiedpush.service.ClientInstallationService;
 import org.jboss.aerogear.unifiedpush.utils.AeroGearLogger;
 
@@ -45,8 +46,8 @@ import static org.jboss.aerogear.unifiedpush.message.util.ConfigurationUtils.try
 @SenderType(iOSVariant.class)
 public class APNsPushNotificationSender implements PushNotificationSender {
 
-    private static final String CUSTOM_AEROGEAR_APNS_PUSH_HOST = "custom.aerogear.apns.push.host";
-    private static final String CUSTOM_AEROGEAR_APNS_PUSH_PORT = "custom.aerogear.apns.push.port";
+    public static final String CUSTOM_AEROGEAR_APNS_PUSH_HOST = "custom.aerogear.apns.push.host";
+    public static final String CUSTOM_AEROGEAR_APNS_PUSH_PORT = "custom.aerogear.apns.push.port";
     private static final String CUSTOM_AEROGEAR_APNS_FEEDBACK_HOST = "custom.aerogear.apns.feedback.host";
     private static final String CUSTOM_AEROGEAR_APNS_FEEDBACK_PORT = "custom.aerogear.apns.feedback.port";
     
@@ -73,23 +74,30 @@ public class APNsPushNotificationSender implements PushNotificationSender {
         final iOSVariant iOSVariant = (iOSVariant) variant;
 
         Message message = pushMessage.getMessage();
+        APNs apns = message.getApns();
         PayloadBuilder builder = APNS.newPayload()
                 // adding recognized key values
                 .alertBody(message.getAlert()) // alert dialog, in iOS or Safari
-                .alertTitle(message.getTitle()) // The title of the notification in Safari
-                .alertAction(message.getAction()) // The label of the action button, if the user sets the notifications to appear as alerts in Safari.
-                .urlArgs(message.getUrlArgs())
                 .badge(message.getBadge()) // little badge icon update;
                 .sound(message.getSound()) // sound to be played by app
-                .category(message.getActionCategory()); // iOS8: User Action category
+                .alertTitle(apns.getTitle()) // The title of the notification in Safari and Apple Watch
+                .alertAction(apns.getAction()) // The label of the action button, if the user sets the notifications to appear as alerts in Safari.
+                .urlArgs(apns.getUrlArgs())
+                .category(apns.getActionCategory()) // iOS8: User Action category
+                .localizedTitleKey(apns.getLocalizedTitleKey()); //iOS8 : Localized Title Key
 
-                // apply the 'content-available:1' value:
-                if (message.isContentAvailable()) {
-                    // content-available is for 'silent' notifications and Newsstand
-                    builder = builder.instantDeliveryOrSilentNotification();
-                }
+        //this kind of check should belong in java-apns
+        if(apns.getLocalizedTitleArguments() != null) {
+            builder .localizedArguments(apns.getLocalizedTitleArguments()); //iOS8 : Localized Title Arguments;
+        }
 
-                builder = builder.customFields(message.getUserData()); // adding other (submitted) fields
+       // apply the 'content-available:1' value:
+        if (apns.isContentAvailable()) {
+            // content-available is for 'silent' notifications and Newsstand
+            builder = builder.instantDeliveryOrSilentNotification();
+        }
+
+        builder = builder.customFields(message.getUserData()); // adding other (submitted) fields
 
         // we are done with adding values here, before building let's check if the msg is too long
         if (builder.isTooLong()) {

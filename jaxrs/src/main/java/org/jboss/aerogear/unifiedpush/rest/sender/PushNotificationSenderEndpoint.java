@@ -17,7 +17,7 @@
 package org.jboss.aerogear.unifiedpush.rest.sender;
 
 import org.jboss.aerogear.unifiedpush.api.PushApplication;
-import org.jboss.aerogear.unifiedpush.message.SenderService;
+import org.jboss.aerogear.unifiedpush.message.NotificationRouter;
 import org.jboss.aerogear.unifiedpush.message.UnifiedPushMessage;
 import org.jboss.aerogear.unifiedpush.utils.AeroGearLogger;
 import org.jboss.aerogear.unifiedpush.rest.util.HttpBasicHelper;
@@ -41,7 +41,7 @@ public class PushNotificationSenderEndpoint {
     @Inject
     private PushApplicationService pushApplicationService;
     @Inject
-    private SenderService senderService;
+    private NotificationRouter notificationRouter;
 
     /**
      * RESTful API for sending Push Notifications.
@@ -56,10 +56,8 @@ public class PushNotificationSenderEndpoint {
      *   -d '{
      *     "message": {
      *      "alert": "HELLO!",
-     *      "action-category": "some value",
      *      "sound": "default",
      *      "badge": 2,
-     *      "content-available": true,
      *      "user-data": {
      *          "key": "value",
      *          "key2": "other value"
@@ -72,6 +70,15 @@ public class PushNotificationSenderEndpoint {
      *          "images": ["Assets/test.jpg", "Assets/background.png"],
      *          "textFields": ["foreground text"]
      *      },
+     *      "apns": {
+     *          "title" : "someTitle",
+     *          "action-category": "some value",
+     *          "content-available": true,
+     *          "action" : "someAction",
+     *          "url-args" :["args1","arg2"],
+     *          "localized-title-key" : "some value",
+     *          "localized-title-arguments" : ["args1","arg2"]
+     *      }
      *      "simple-push": "version=123"
      *     },
      *     "criteria": {
@@ -112,8 +119,8 @@ public class PushNotificationSenderEndpoint {
         // add the client identifier
         message.setClientIdentifier(HttpRequestUtil.extractAeroGearSenderInformation(request));
 
-        // submitted to @Async EJB:
-        senderService.send(pushApplication, message);
+        // submitted to EJB:
+        notificationRouter.submit(pushApplication, message);
         logger.fine("Message sent by: '" + message.getClientIdentifier() + "'");
         logger.info("Message submitted to PushNetworks for further processing");
 

@@ -16,12 +16,15 @@
  */
 package org.jboss.aerogear.unifiedpush.jpa.dao.impl;
 
-import org.jboss.aerogear.unifiedpush.dao.GenericBaseDao;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import java.util.List;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.jboss.aerogear.unifiedpush.dao.GenericBaseDao;
 
 public abstract class JPABaseDao<T, K> implements GenericBaseDao<T, K> {
 
@@ -44,6 +47,11 @@ public abstract class JPABaseDao<T, K> implements GenericBaseDao<T, K> {
         return entityManager.createQuery(jpql, type);
     }
 
+    protected Query createHibernateQuery(String hql) {
+        Session session = (Session) entityManager.getDelegate();
+        return session.createQuery(hql);
+    }
+
     //because you can't do T.class
     public abstract Class<T> getType();
 
@@ -62,6 +70,12 @@ public abstract class JPABaseDao<T, K> implements GenericBaseDao<T, K> {
 
     public void delete(T entity) {
         if (entity != null) {
+            // making sure the entity in question,
+            // is really part of this transaction
+            if (! entityManager.contains(entity)) {
+                entity = entityManager.merge(entity);
+            }
+
             entityManager.remove(entity);
         }
     }

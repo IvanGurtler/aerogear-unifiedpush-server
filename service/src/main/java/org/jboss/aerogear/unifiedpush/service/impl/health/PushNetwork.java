@@ -14,19 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jboss.aerogear.unifiedpush.service.impl.health;
 
-package org.jboss.aerogear.unifiedpush.message;
+/**
+ * Readonly holder of Push network information
+ */
+public class PushNetwork {
+    private String name;
+    private String host;
+    private int port;
 
-import org.jboss.aerogear.unifiedpush.api.PushApplication;
-import org.jboss.aerogear.unifiedpush.message.UnifiedPushMessage;
+    public PushNetwork(String name, String host, int port) {
+        this.name = name;
+        this.host = host;
+        this.port = port;
+    }
 
-public interface SenderService {
+    public String getName() {
+        return name;
+    }
 
-    /**
-     * Sends the given message/payload to ALL installations of the variants, matching the given criterias.
-     * 
-     * @param pushApplication the root target for all installations being notified 
-     * @param payload the payload to be sent
-     */
-    void send(PushApplication pushApplication, UnifiedPushMessage payload);
+    public String getHost() {
+        return host;
+    }
+
+    public int getPort() {
+        return port;
+    }
 }

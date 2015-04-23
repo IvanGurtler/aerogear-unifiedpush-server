@@ -3,11 +3,8 @@
   "clientIdentifier": null,
   "message": {
     "alert": "HELLO!",
-    "title": null,
-    "action": null,
     "sound": "default",
     "badge": 2,
-    "page": "/MainPage.xaml",
     "consolidationKey": null,
     "windows": {
       "type": "tile",
@@ -18,11 +15,19 @@
       "images": [
       ],
       "textFields": [
-      ]
+      ],
+      "page": "/MainPage.xaml"
     },
-    "action-category": "some value",
-    "url-args": null,
-    "content-available": true,
+    "apns": {
+      "title": null,
+      "action": null,
+      "action-category": "some value",
+      "url-args": null,
+      "content-available": true,
+      "localized-title-key": null,
+      "localized-title-arguments": null
+    },
+
     "user-data": {
       "key2": "other value",
       "key": "value"

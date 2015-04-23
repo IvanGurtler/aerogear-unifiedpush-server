@@ -14,25 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.aerogear.unifiedpush.rest.util;
+package org.jboss.aerogear.unifiedpush.jpa.dao.impl;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 /**
- * A class to test the Authorization status of a user
+ * Simple dao that checks if the database is available by running select 1 query.
  */
-@Path("/ping")
-public class Ping {
+public class JPAHealthDao {
+    @Inject
+    private EntityManager entityManager;
 
-    /**
-     * an endpoint for testing the authorization status of a user
-     *
-     * @return 204(No Content) or 401( not authorized )
-     */
-    @GET
-    public Response ping() {
-        return Response.noContent().build();
+    public boolean dbCheck() {
+        return entityManager.createNativeQuery("select 1 from PushApplication").getFirstResult() == 1;
     }
 }

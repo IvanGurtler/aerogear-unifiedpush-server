@@ -51,13 +51,13 @@ public class UnifiedPushMessageTest {
         Message message = new Message();
 
         message.setAlert("HELLO!");
-        message.setActionCategory("some value");
+        message.getApns().setActionCategory("some value");
         message.setSound("default");
         message.setBadge(2);
-        message.setPage("/MainPage.xaml");
+        message.getWindows().setPage("/MainPage.xaml");
         message.getWindows().setType(Type.tile);
         message.getWindows().setTileType(TileType.TileWideBlockAndText01);
-        message.setContentAvailable(true);
+        message.getApns().setContentAvailable(true);
 
         final HashMap<String, Object> data = new HashMap<String, Object>();
         data.put("key", "value");
@@ -205,6 +205,7 @@ public class UnifiedPushMessageTest {
 
         final Map<String, Object> container = new LinkedHashMap<String, Object>();
         final Map<String, Object> messageObject = new LinkedHashMap<String, Object>();
+        final Map<String, Object> apnsObject = new LinkedHashMap<String, Object>();
 
         messageObject.put("alert", "Howdy");
         messageObject.put("sound", "default");
@@ -213,8 +214,8 @@ public class UnifiedPushMessageTest {
         data.put("someKey", "someValue");
         messageObject.put("user-data", data);
 
-        messageObject.put("content-available", true);
-
+        apnsObject .put("content-available", true);
+        messageObject.put("apns",apnsObject );
         container.put("message", messageObject);
 
         // parse it:
@@ -222,7 +223,7 @@ public class UnifiedPushMessageTest {
 
         assertEquals("Howdy", unifiedPushMessage.getMessage().getAlert());
         assertEquals(-1, unifiedPushMessage.getMessage().getBadge());
-        assertTrue(unifiedPushMessage.getMessage().isContentAvailable());
+        assertTrue(unifiedPushMessage.getMessage().getApns().isContentAvailable());
     }
 
     @Test
@@ -244,7 +245,7 @@ public class UnifiedPushMessageTest {
 
         assertEquals("Howdy", unifiedPushMessage.getMessage().getAlert());
         assertEquals(-1, unifiedPushMessage.getMessage().getBadge());
-        assertFalse(unifiedPushMessage.getMessage().isContentAvailable());
+        assertFalse(unifiedPushMessage.getMessage().getApns().isContentAvailable());
     }
 
     @Test
@@ -278,15 +279,17 @@ public class UnifiedPushMessageTest {
     public void testAction() throws IOException{
         final Map<String, Object> container = new LinkedHashMap<String, Object>();
         final Map<String, Object> messageObject = new LinkedHashMap<String, Object>();
+        final Map<String, Object> apnsObject = new LinkedHashMap<String, Object>();
+
+        apnsObject.put("action", "View");
 
         messageObject.put("alert", "howdy");
-        messageObject.put("action", "View");
-
+        messageObject.put("apns",apnsObject);
         container.put("message", messageObject);
 
         // parse it:
         final UnifiedPushMessage unifiedPushMessage = parsePushMessage(container);
-        assertEquals("View", unifiedPushMessage.getMessage().getAction());
+        assertEquals("View", unifiedPushMessage.getMessage().getApns().getAction());
 
     }
 
@@ -294,34 +297,67 @@ public class UnifiedPushMessageTest {
     public void testUrlArgs() throws IOException {
         final Map<String, Object> container = new LinkedHashMap<String, Object>();
         final Map<String, Object> messageObject = new LinkedHashMap<String, Object>();
+        final Map<String, Object> apnsObject = new LinkedHashMap<String, Object>();
         final String[] urlArgs = { "Arg1", "Arg2" };
 
-
-
+        apnsObject.put("title", "I'm a Title");
+        apnsObject.put("url-args", urlArgs);
+        messageObject.put("apns",apnsObject);
         messageObject.put("alert", "howdy");
-        messageObject.put("title", "I'm a Title");
-        messageObject.put("url-args", urlArgs);
 
         container.put("message", messageObject);
 
         // parse it:
         final UnifiedPushMessage unifiedPushMessage = parsePushMessage(container);
-        assertEquals("[Arg1, Arg2]", Arrays.toString(unifiedPushMessage.getMessage().getUrlArgs()));
+        assertEquals("[Arg1, Arg2]", Arrays.toString(unifiedPushMessage.getMessage().getApns().getUrlArgs()));
     }
 
     @Test
     public void testActionCategory() throws IOException {
         final Map<String, Object> container = new LinkedHashMap<String, Object>();
         final Map<String, Object> messageObject = new LinkedHashMap<String, Object>();
+        final Map<String, Object> apnsObject = new LinkedHashMap<String, Object>();
 
+        apnsObject.put("action-category", "POSTS");
         messageObject.put("alert", "Howdy");
-        messageObject.put("action-category", "POSTS");
-
+        messageObject.put("apns",apnsObject);
         container.put("message", messageObject);
 
         // parse it:
         final UnifiedPushMessage unifiedPushMessage = parsePushMessage(container);
-        assertEquals("POSTS", unifiedPushMessage.getMessage().getActionCategory());
+        assertEquals("POSTS", unifiedPushMessage.getMessage().getApns().getActionCategory());
+    }
+
+    @Test
+    public void testLocalizedTitleKey() throws IOException {
+        final Map<String, Object> container = new LinkedHashMap<String, Object>();
+        final Map<String, Object> messageObject = new LinkedHashMap<String, Object>();
+        final Map<String, Object> apnsObject = new LinkedHashMap<String, Object>();
+
+        apnsObject.put("localized-title-key", "myLocalizedTitle");
+        messageObject.put("alert", "Howdy");
+        messageObject.put("apns",apnsObject);
+        container.put("message", messageObject);
+
+        // parse it:
+        final UnifiedPushMessage unifiedPushMessage = parsePushMessage(container);
+        assertEquals("myLocalizedTitle", unifiedPushMessage.getMessage().getApns().getLocalizedTitleKey());
+    }
+
+    @Test
+    public void testLocalizedTitleArguments() throws IOException {
+        final Map<String, Object> container = new LinkedHashMap<String, Object>();
+        final Map<String, Object> messageObject = new LinkedHashMap<String, Object>();
+        final Map<String, Object> apnsObject = new LinkedHashMap<String, Object>();
+        String[] arguments = {"Jambon","ham"};
+        apnsObject.put("localized-title-arguments", arguments);
+        messageObject.put("alert", "Howdy");
+        messageObject.put("apns",apnsObject);
+        container.put("message", messageObject);
+
+        // parse it:
+        final UnifiedPushMessage unifiedPushMessage = parsePushMessage(container);
+        assertEquals("[Jambon, ham]", Arrays.toString(unifiedPushMessage.getMessage().getApns().getLocalizedTitleArguments()));
     }
 
     @Test
@@ -552,32 +588,71 @@ public class UnifiedPushMessageTest {
     }
 
     @Test
-    public void testMessageToJson() throws IOException, URISyntaxException {
+    public void testMessageToStrippedJson() throws IOException, URISyntaxException {
         //given
         final Map<String, Object> container = new LinkedHashMap<String, Object>();
         final Map<String, Object> messageObject = new LinkedHashMap<String, Object>();
+        final Map<String, Object> apnsObject = new LinkedHashMap<String, Object>();
 
         messageObject.put("alert", "HELLO!");
         messageObject.put("sound", "default");
         messageObject.put("badge", 2);
-        messageObject.put("page", "cordova");
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("key", "value");
         data.put("key2", "value");
         messageObject.put("user-data", data);
-        messageObject.put("action-category", "category");
-        messageObject.put("content-available", "true");
+        apnsObject.put("action-category", "category");
+        apnsObject.put("content-available", "true");
         messageObject.put("simple-push", "version=123");
         Map<String, Object> windows = new HashMap<String, Object>();
         windows.put("type", "tile");
         windows.put("tileType", "TileWideBlockAndText01");
+        windows.put("page", "cordova");
         messageObject.put("windows", windows);
+        messageObject.put("apns",apnsObject);
 
         container.put("message", messageObject);
 
         //when
         final UnifiedPushMessage unifiedPushMessage = parsePushMessage(container);
-        String json = unifiedPushMessage.toJsonString();
+        String json = unifiedPushMessage.toStrippedJsonString();
+
+        //then
+        Path path = Paths.get(getClass().getResource("/message-tostrippedjson.json").toURI());
+        String expectedJson = new String(Files.readAllBytes(path), Charset.defaultCharset());
+        //poor mans equals ignore white space
+        assertEquals(expectedJson.replaceAll("\\s", ""), json);
+    }
+
+    @Test
+    public void testMessageToJson() throws IOException, URISyntaxException {
+        //given
+        final Map<String, Object> container = new LinkedHashMap<String, Object>();
+        final Map<String, Object> messageObject = new LinkedHashMap<String, Object>();
+        final Map<String, Object> apnsObject = new LinkedHashMap<String, Object>();
+
+        messageObject.put("alert", "HELLO!");
+        messageObject.put("sound", "default");
+        messageObject.put("badge", 2);
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("key", "value");
+        data.put("key2", "value");
+        messageObject.put("user-data", data);
+        apnsObject.put("action-category", "category");
+        apnsObject.put("content-available", "true");
+        messageObject.put("simple-push", "version=123");
+        Map<String, Object> windows = new HashMap<String, Object>();
+        windows.put("type", "tile");
+        windows.put("tileType", "TileWideBlockAndText01");
+        windows.put("page", "cordova");
+        messageObject.put("windows", windows);
+        messageObject.put("apns",apnsObject);
+
+        container.put("message", messageObject);
+
+        //when
+        final UnifiedPushMessage unifiedPushMessage = parsePushMessage(container);
+        String json = unifiedPushMessage.toStrippedJsonString();
 
         //then
         Path path = Paths.get(getClass().getResource("/message-tojson.json").toURI());
