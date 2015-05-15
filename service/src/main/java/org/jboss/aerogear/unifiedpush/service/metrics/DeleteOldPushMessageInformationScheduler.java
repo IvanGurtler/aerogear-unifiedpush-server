@@ -16,9 +16,13 @@
  */
 package org.jboss.aerogear.unifiedpush.service.metrics;
 
+import java.io.File;
+
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.inject.Inject;
+
+import org.jboss.aerogear.unifiedpush.utils.AeroGearLogger;
 
 @Singleton
 public class DeleteOldPushMessageInformationScheduler {
@@ -26,6 +30,8 @@ public class DeleteOldPushMessageInformationScheduler {
     @Inject
     private PushMessageMetricsService service;
 
+    private final AeroGearLogger logger = AeroGearLogger.getInstance(DeleteOldPushMessageInformationScheduler.class);
+    
     /**
      * Job that triggers a delete of outdated metric information from the Server.
      *
@@ -34,6 +40,14 @@ public class DeleteOldPushMessageInformationScheduler {
      */
     @Schedule
     public void deleteOutdatedMetrics(){
-        service.deleteOutdatedPushInformationData();
+    	File f = new File("/jboss/servers/jbmaster");
+    	if (f.exists() && f.isDirectory()) {
+    		logger.finest("I am master. I start delete outdated push information data.");
+    		service.deleteOutdatedPushInformationData();    		    		
+    	}
+    	else
+    	{
+    		logger.finest("I am not master. I do nothing.");
+    	}
     }
 }
