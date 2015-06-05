@@ -17,10 +17,13 @@
 package org.jboss.aerogear.unifiedpush.jpa.dao.impl;
 
 import org.jboss.aerogear.unifiedpush.dao.GenericBaseDao;
+import org.jboss.aerogear.unifiedpush.utils.Syslog;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import javax.persistence.TypedQuery;
+
 import java.util.List;
 
 public abstract class JPABaseDao<T, K> implements GenericBaseDao<T, K> {
@@ -57,7 +60,12 @@ public abstract class JPABaseDao<T, K> implements GenericBaseDao<T, K> {
 
     public void update(T entity) {
         entityManager.merge(entity);
-        entityManager.flush();
+        try{        	
+            entityManager.flush();
+        }catch(PersistenceException e){
+        	Syslog.auditToSyslog("SMART_OTP_0300", e.getMessage(), "LOG_LOCAL4");
+        	throw e;
+        }
     }
 
     public void delete(T entity) {
@@ -76,12 +84,17 @@ public abstract class JPABaseDao<T, K> implements GenericBaseDao<T, K> {
     }
 
     protected T getSingleResultForQuery(TypedQuery<T> query) {
-        List<T> result = query.getResultList();
-
-        if (!result.isEmpty()) {
-            return result.get(0);
-        } else {
-            return null;
+    	try{
+	    	List<T> result = query.getResultList();
+	
+	        if (!result.isEmpty()) {
+	            return result.get(0);
+	        } else {
+	            return null;
+	        }
+        }catch(PersistenceException e){
+        	Syslog.auditToSyslog("SMART_OTP_0300", e.getMessage(), "LOG_LOCAL4");
+        	throw e;
         }
     }
 }
