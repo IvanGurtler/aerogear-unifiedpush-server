@@ -26,6 +26,7 @@ import com.notnoop.apns.EnhancedApnsNotification;
 import com.notnoop.apns.PayloadBuilder;
 import com.notnoop.apns.internal.Utilities;
 import com.notnoop.exceptions.ApnsDeliveryErrorException;
+
 import org.jboss.aerogear.unifiedpush.api.Variant;
 import org.jboss.aerogear.unifiedpush.api.iOSVariant;
 import org.jboss.aerogear.unifiedpush.message.Message;
@@ -34,11 +35,15 @@ import org.jboss.aerogear.unifiedpush.service.ClientInstallationService;
 import org.jboss.aerogear.unifiedpush.utils.AeroGearLogger;
 
 import javax.inject.Inject;
+
 import java.io.ByteArrayInputStream;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
 import static org.jboss.aerogear.unifiedpush.message.util.ConfigurationUtils.tryGetProperty;
 import static org.jboss.aerogear.unifiedpush.message.util.ConfigurationUtils.tryGetIntegerProperty;
 
@@ -173,6 +178,18 @@ public class APNsPushNotificationSender implements PushNotificationSender {
 
             final ApnsServiceBuilder builder = APNS.newService();
 
+            //iOS Proxy
+            String proxyHost = System.getProperty("https.proxyHost");
+            String proxyPort = System.getProperty("https.proxyPort");
+                        
+            if(proxyHost != null && !proxyHost.isEmpty() && proxyPort!= null && !proxyPort.isEmpty()){
+            	builder.withProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.valueOf(proxyPort)))); 
+            	logger.info("With http proxy");
+            }
+            else{
+            	logger.info("Without http proxy");
+            }
+            
             // using the APNS Delegate callback to log success/failure for each token:
             builder.withDelegate(new ApnsDelegateAdapter() {
                 @Override
