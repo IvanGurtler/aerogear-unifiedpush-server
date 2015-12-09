@@ -21,7 +21,6 @@ import org.jboss.aerogear.unifiedpush.api.PushMessageInformation;
 import org.jboss.aerogear.unifiedpush.api.Variant;
 import org.jboss.aerogear.unifiedpush.api.VariantMetricInformation;
 import org.jboss.aerogear.unifiedpush.utils.AeroGearLogger;
-import org.jboss.aerogear.unifiedpush.utils.Syslog;
 import org.jboss.aerogear.unifiedpush.message.sender.NotificationSenderCallback;
 import org.jboss.aerogear.unifiedpush.message.sender.PushNotificationSender;
 import org.jboss.aerogear.unifiedpush.message.sender.SenderTypeLiteral;
@@ -34,7 +33,6 @@ import javax.ejb.Stateless;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -147,8 +145,6 @@ public class SenderServiceImpl implements SenderService {
         public void onError(final String reason) {
             logger.warning(String.format("Error on '%s' delivery", variant.getType().getTypeName()));
             updateStatusOfPushMessageInformation(pushMessageInformation, variant.getVariantID(), tokenSize, Boolean.FALSE, reason);
-            
-            Syslog.auditToSyslog("SMART_OTP_0301", reason, "LOG_LOCAL4");            
         }
     }
 }
