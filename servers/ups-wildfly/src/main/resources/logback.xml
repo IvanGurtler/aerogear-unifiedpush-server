@@ -2,14 +2,14 @@
 	<jmxConfigurator />
 	<appender name="FILE"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${mep.log.dir}/pushsrv.log</file>
+		<file>/var/app/otp/log/pushsrv/pushsrv.log</file>
 		<encoder>
 			<pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n
 			</pattern>
 		</encoder>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!-- roll per day -->
-			<fileNamePattern>${mep.log.dir}/pushsrv.%d{yyyy-MM-dd}.%i.log
+			<fileNamePattern>/var/app/otp/log/pushsrv/pushsrv.%d{yyyy-MM-dd}.%i.log
 			</fileNamePattern>
 			<!-- remove files older than 30 days -->
 			<maxHistory>30</maxHistory>
@@ -27,7 +27,7 @@
 	</appender>
 	<appender name="ERRFILE"
 		class="ch.qos.logback.core.FileAppender">
-		<file>${mep.log.dir}/pushsrv.err</file>
+		<file>/var/app/otp/log/pushsrv/pushsrv.err</file>
 		<encoder>
 			<pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n
 			</pattern>
