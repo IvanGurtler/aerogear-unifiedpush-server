@@ -39,9 +39,12 @@ import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.security.KeyStore;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import static org.jboss.aerogear.unifiedpush.message.util.ConfigurationUtils.tryGetProperty;
@@ -167,6 +170,7 @@ public class APNsPushNotificationSender implements PushNotificationSender {
         return lowerCaseTokens;
     }
 
+    private static Map<String, KeyStore> storeCache = new HashMap<String, KeyStore>();
     /**
      * Returns the ApnsService, based on the required profile (production VS sandbox/test).
      * Null is returned if there is no "configuration" for the request stage
@@ -216,11 +220,26 @@ public class APNsPushNotificationSender implements PushNotificationSender {
 
             // add the certificate:
             try {
-                ByteArrayInputStream stream = new ByteArrayInputStream(iOSVariant.getCertificate());
-                builder.withCert(stream, iOSVariant.getPassphrase());
-
-                // release the stream
-                stream.close();
+            	KeyStore keyStore = storeCache.get(iOSVariant.getVariantID());
+            	
+            	if(keyStore == null){
+            		logger.info("Store not found in locally cache");
+            		ByteArrayInputStream stream = new ByteArrayInputStream(iOSVariant.getCertificate());
+            		
+            		logger.info("Creating keystore");
+            		keyStore = KeyStore.getInstance("PKCS12");            		
+            		keyStore.load(stream, iOSVariant.getPassphrase().toCharArray());
+            		logger.info("Keystore created");
+            		
+            		// release the stream
+                    stream.close();
+            		
+            		storeCache.put(iOSVariant.getVariantID(), keyStore);
+            		logger.info("Keystore for variantID " + iOSVariant.getVariantID() +  " added to keystore cache");
+            	}        
+            	
+            	logger.info("Adding certificate context, keyStore " + keyStore + "/ pass length " + iOSVariant.getPassphrase().length());
+                builder.withCert(keyStore, iOSVariant.getPassphrase());                
             } catch (Exception e) {
                 logger.severe("Error reading certificate", e);
 
