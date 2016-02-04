@@ -17,7 +17,6 @@
 package org.jboss.aerogear.unifiedpush.service.metrics;
 
 import java.io.File;
-
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.inject.Inject;
@@ -39,10 +38,28 @@ public class DeleteOldPushMessageInformationScheduler {
      * in which the application is executing. These are the default values from the @Schedule annotation.
      */
     @Schedule
-    public void deleteOutdatedMetrics(){
+    public void deleteOutdatedMetrics(){    	
+    	logger.finest("start delete service");
+    	
+    	String server_log_dir = "empty";
+    	String server_temp_dir = "empty";
+    	String server_data_dir = "empty";
+    	try{
+    		server_log_dir = System.getenv("jboss.server.log.dir");
+    		server_temp_dir = System.getenv("jboss.server.temp.dir");  
+    		server_data_dir = System.getenv("jboss.server.data.dir");   
+    		
+    		logger.finest("server_log_dir" + server_log_dir);
+    		logger.finest("server_temp_dir" + server_temp_dir);
+    		logger.finest("server_data_dir" + server_data_dir);
+    	}catch(Exception e){
+    		logger.warning("exception " + e.getMessage());
+    	}    
+    	
     	File f = new File("/jboss/servers/jbmaster");
-    	if (f.exists() && f.isDirectory()) {
-    		logger.finest("I am master. I start delete outdated push information data.");
+    	if ((f.exists() && f.isDirectory()) || server_log_dir.contains("server-1") 
+    			|| server_temp_dir.contains("server-1") || server_data_dir.contains("server-1")) {
+    		logger.finest("I am master or server-1. I start delete outdated push information data.");
     		service.deleteOutdatedPushInformationData();    		    		
     	}
     	else
