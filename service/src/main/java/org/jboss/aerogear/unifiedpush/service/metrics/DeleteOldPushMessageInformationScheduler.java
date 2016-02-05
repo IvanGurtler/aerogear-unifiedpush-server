@@ -31,6 +31,7 @@ public class DeleteOldPushMessageInformationScheduler {
 
     private final AeroGearLogger logger = AeroGearLogger.getInstance(DeleteOldPushMessageInformationScheduler.class);
     
+    private String FINDING_SERVER = "server-1";
     /**
      * Job that triggers a delete of outdated metric information from the Server.
      *
@@ -39,32 +40,39 @@ public class DeleteOldPushMessageInformationScheduler {
      */
     @Schedule
     public void deleteOutdatedMetrics(){    	
-    	logger.finest("start delete service");
-    	
+    	logger.info("start delete service");
+    	    	    	
+    	String server_name = "empty";
+    	String server_node_name = "empty";
     	String server_log_dir = "empty";
     	String server_temp_dir = "empty";
     	String server_data_dir = "empty";
     	try{
-    		server_log_dir = System.getenv("jboss.server.log.dir");
-    		server_temp_dir = System.getenv("jboss.server.temp.dir");  
-    		server_data_dir = System.getenv("jboss.server.data.dir");   
+    		server_name = System.getProperty("jboss.server.name");
+    		server_node_name = System.getProperty("jboss.node.name");
+    		server_log_dir = System.getProperty("jboss.server.log.dir");
+    		server_temp_dir = System.getProperty("jboss.server.temp.dir");  
+    		server_data_dir = System.getProperty("jboss.server.data.dir");   
     		
-    		logger.finest("server_log_dir" + server_log_dir);
-    		logger.finest("server_temp_dir" + server_temp_dir);
-    		logger.finest("server_data_dir" + server_data_dir);
+    		logger.finest("jboss.server.name: " + server_name);
+    		logger.finest("jboss.node.name: " + server_node_name);
+    		logger.finest("jboss.server.log.dir: " + server_log_dir);
+    		logger.finest("jboss.server.temp.dir: " + server_temp_dir);
+    		logger.finest("jboss.server.temp.dir: " + server_data_dir);
     	}catch(Exception e){
     		logger.warning("exception " + e.getMessage());
     	}    
     	
     	File f = new File("/jboss/servers/jbmaster");
-    	if ((f.exists() && f.isDirectory()) || server_log_dir.contains("server-1") 
-    			|| server_temp_dir.contains("server-1") || server_data_dir.contains("server-1")) {
-    		logger.finest("I am master or server-1. I start delete outdated push information data.");
+    	if ((f.exists() && f.isDirectory()) || server_name.contains(FINDING_SERVER) 
+    			|| server_node_name.contains(FINDING_SERVER) || server_log_dir.contains(FINDING_SERVER) 
+    			|| server_temp_dir.contains(FINDING_SERVER) || server_data_dir.contains(FINDING_SERVER)) {
+    		logger.finest("I am master or " + FINDING_SERVER + ". I start delete outdated push information data.");
     		service.deleteOutdatedPushInformationData();    		    		
     	}
     	else
     	{
-    		logger.finest("I am not master. I do nothing.");
+    		logger.finest("I am not master or " + FINDING_SERVER + ". I do nothing.");
     	}
     }
 }
