@@ -100,6 +100,9 @@ public class JPAPushMessageInformationDao extends JPABaseDao<PushMessageInformat
     	
     	logger.info("Deleting ['" + affectedRows1 + "'] outdated VariantMetricInformation objects");
     	
+    	entityManager.flush();
+    	entityManager.clear();
+    	
     	try {
     		logger.finest("Start 1 min sleep");
 			Thread.sleep(60000);			
