@@ -35,11 +35,23 @@
             <artifactId>unifiedpush-server-dependencies</artifactId>
             <version>${project.version}</version>
             <type>pom</type>
+            <exclusions>
+            	<exclusion>
+            		<artifactId>bcprov-jdk16</artifactId>
+            		<groupId>org.bouncycastle</groupId>
+            	</exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
           <groupId>org.keycloak</groupId>
           <artifactId>keycloak-wildfly-adapter</artifactId>
+          <exclusions>
+          	<exclusion>
+          		<artifactId>bcprov-jdk16</artifactId>
+          		<groupId>org.bouncycastle</groupId>
+          	</exclusion>
+          </exclusions>
         </dependency>
 
     </dependencies>

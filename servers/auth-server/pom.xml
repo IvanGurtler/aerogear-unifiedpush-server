@@ -34,6 +34,12 @@
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-dependencies-server-min</artifactId>
             <type>pom</type>
+            <exclusions>
+            	<exclusion>
+            		<artifactId>bcprov-jdk16</artifactId>
+            		<groupId>org.bouncycastle</groupId>
+            	</exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -68,10 +74,6 @@
             <artifactId>keycloak-model-sessions-jpa</artifactId>
         </dependency>
 
-        <dependency>
-          <groupId>org.bouncycastle</groupId>
-          <artifactId>bcprov-jdk16</artifactId>
-        </dependency>
 
     </dependencies>
 
